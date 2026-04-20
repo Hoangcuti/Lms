@@ -91,28 +91,13 @@
                     <div class="nav-section-label">Quản trị hệ thống</div>
                     <ul style="list-style:none">
                         <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('users')">
-                                <span class="nav-icon">👤</span> Người dùng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('departments')">
-                                <span class="nav-icon">🏦</span> Phòng ban
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('courses')">
-                                <span class="nav-icon">📚</span> Khóa học
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('permissions')">
-                                <span class="nav-icon">🔐</span> Phân quyền
+                            <a class="nav-link" href="@Url.Action("Index", "Admin")#users-tab">
+                                <span class="nav-icon">👤</span> Người dùng & Phân quyền
                             </a>
                         </li>
                         @if (role == "ADMIN") {
                             <li class="nav-item">
-                                <a class="nav-link" onclick="navigate('auditlogs')">
+                                <a class="nav-link" href="@Url.Action("Index", "Admin")#logs-tab">
                                     <span class="nav-icon">📋</span> Nhật ký hoạt động
                                 </a>
                             </li>
@@ -120,45 +105,14 @@
                     </ul>
                 }
 
-                @if (role == "ADMIN" || role == "HR")
-                {
-                    <div class="nav-section-label">Nhân sự & Đào tạo</div>
-                    <ul style="list-style:none">
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('employees')">
-                                <span class="nav-icon">👥</span> Quản lý nhân sự
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('assignments')">
-                                <span class="nav-icon">🎯</span> Phân công đào tạo
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('budget')">
-                                <span class="nav-icon">💰</span> Ngân sách đào tạo
-                            </a>
-                        </li>
-                    </ul>
-                }
 
                 @if (role == "Department Manager")
                 {
                     <div class="nav-section-label">Quản lý phòng ban</div>
                     <ul style="list-style:none">
                         <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('members')">
-                                <span class="nav-icon">👥</span> Nhân viên của tôi
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('dept-courses')">
-                                <span class="nav-icon">📚</span> Khóa học bộ phận
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('dept-progress')">
-                                <span class="nav-icon">📈</span> Tiến độ học tập
+                            <a class="nav-link" href="@Url.Action("Index", "DeptManager")">
+                                <span class="nav-icon">📈</span> Dashboard phòng ban
                             </a>
                         </li>
                     </ul>
@@ -169,30 +123,20 @@
                     <div class="nav-section-label">Giảng dạy</div>
                     <ul style="list-style:none">
                         <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('my-courses')">
-                                <span class="nav-icon">👨‍🏫</span> Khóa học giảng dạy
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('student-exam-results')">
-                                <span class="nav-icon">📝</span> Kết quả thi học viên
+                            <a class="nav-link" href="@Url.Action("Index", "Instructor")">
+                                <span class="nav-icon">👨‍🏫</span> Quản lý khóa học
                             </a>
                         </li>
                     </ul>
                 }
 
-                @if (role == "Employee")
+                @if (role == "Employee" || string.IsNullOrEmpty(role))
                 {
                     <div class="nav-section-label">Học tập</div>
                     <ul style="list-style:none">
                         <li class="nav-item">
                             <a class="nav-link" href="@Url.Action("Index", "Student")">
                                 <span class="nav-icon">📖</span> Khóa học của tôi
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="navigate('my-certs')">
-                                <span class="nav-icon">📜</span> Chứng chỉ của tôi
                             </a>
                         </li>
                     </ul>
@@ -207,6 +151,7 @@
                     </li>
                 </ul>
             </nav>
+
 
             <div class="sidebar-footer" style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
                 <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Giao diện</span>

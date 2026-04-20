@@ -84,7 +84,7 @@ public class AdminController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddUser(string username, string fullName, string email, int departmentId, string roleName)
+    public async Task<IActionResult> AddUser(string username, string fullName, string email, int? departmentId, string roleName)
     {
         var auth = RequireAdmin();
         if (auth != null) return Json(new { success = false, message = "Unauthorized" });
@@ -116,7 +116,7 @@ public class AdminController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditUser(int userId, string fullName, string email, int departmentId)
+    public async Task<IActionResult> EditUser(int userId, string fullName, string email, int? departmentId)
     {
         var auth = RequireAdmin();
         if (auth != null) return Json(new { success = false, message = "Unauthorized" });

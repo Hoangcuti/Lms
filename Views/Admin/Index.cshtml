@@ -18,12 +18,28 @@
             </div>
             <div class="stat-icon"><i class="fas fa-users"></i></div>
         </div>
-        <div class="stat-card admin-theme">
+        <div class="stat-card admin-theme completion-card">
             <div class="stat-info">
                 <h3>Tỷ Lệ Hoàn Thành</h3>
-                <div class="value">@Model.CompletionRate%</div>
+                <div class="completion-detail">
+                    <div class="completion-legend">
+                        <div class="legend-item"><span class="dot dot-done"></span> Hoàn thành: @(Model.CompletionRate)%</div>
+                        <div class="legend-item"><span class="dot dot-remain"></span> Chưa hoàn thành: @(100 - Model.CompletionRate)%</div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
+            <div class="donut-wrap">
+                <svg class="donut-svg" viewBox="0 0 120 120">
+                    <circle class="donut-bg" cx="60" cy="60" r="48" />
+                    <circle class="donut-progress" id="donutProgress" cx="60" cy="60" r="48"
+                            stroke-dasharray="0 301.59"
+                            data-value="@Model.CompletionRate" />
+                </svg>
+                <div class="donut-center">
+                    <span class="donut-pct" id="donutPct">0%</span>
+                    <span class="donut-label">Hoàn thành</span>
+                </div>
+            </div>
         </div>
         <div class="stat-card admin-theme">
             <div class="stat-info">
@@ -159,22 +175,22 @@
             <input type="hidden" id="modalUserId" />
             
             <div class="form-group mb-3" id="groupUsername">
-                <label>Username</label>
-                <input type="text" id="modalUsername" class="form-control" />
+                <label class="form-label-styled"><i class="fas fa-user" style="color:#2563eb"></i> Username</label>
+                <input type="text" id="modalUsername" class="form-control" placeholder="Nhập username..." />
             </div>
             
             <div class="form-group mb-3">
-                <label>Họ tên</label>
-                <input type="text" id="modalFullName" class="form-control" />
+                <label class="form-label-styled"><i class="fas fa-id-card" style="color:#10b981"></i> Họ tên</label>
+                <input type="text" id="modalFullName" class="form-control" placeholder="Nhập họ và tên..." />
             </div>
             
             <div class="form-group mb-3">
-                <label>Email</label>
-                <input type="email" id="modalEmail" class="form-control" />
+                <label class="form-label-styled"><i class="fas fa-envelope" style="color:#f59e0b"></i> Email</label>
+                <input type="email" id="modalEmail" class="form-control" placeholder="Nhập địa chỉ email..." />
             </div>
             
             <div class="form-group mb-3">
-                <label>Phòng ban</label>
+                <label class="form-label-styled"><i class="fas fa-building" style="color:#8b5cf6"></i> Phòng ban</label>
                 <select id="modalDept" class="form-select">
                     <option value="">-- Chọn phòng ban --</option>
                     @foreach(var d in Model.Departments)
@@ -185,7 +201,7 @@
             </div>
             
             <div class="form-group mb-3" id="groupRole">
-                <label>Role</label>
+                <label class="form-label-styled"><i class="fas fa-shield-alt" style="color:#ef4444"></i> Phân quyền (Role)</label>
                 <select id="modalRole" class="form-select">
                     <option value="">Employee (Mặc định)</option>
                     @foreach(var r in Model.AvailableRoles)
@@ -240,6 +256,37 @@
         display: flex; align-items: center; justify-content: center;
         border-radius: 1rem;
     }
+
+    /* Donut Chart */
+    .completion-card { align-items: center; gap: 1rem; }
+    .completion-detail { margin-top: 0.5rem; }
+    .completion-legend { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .legend-item { font-size: 13px; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot-done { background: #2563eb; }
+    .dot-remain { background: #e2e8f0; }
+
+    .donut-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+    .donut-svg { width: 110px; height: 110px; transform: rotate(-90deg); }
+    .donut-bg { fill: none; stroke: #e2e8f0; stroke-width: 12; }
+    .donut-progress {
+        fill: none; stroke: #2563eb; stroke-width: 12;
+        stroke-linecap: round;
+        transition: stroke-dasharray 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .donut-center {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+    .donut-pct { font-size: 1.3rem; font-weight: 800; color: #2563eb; }
+
+    /* Modal label styling */
+    .form-label-styled { 
+        font-size: 13px; font-weight: 600; color: #374151; 
+        display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+    }
+    .form-label-styled i { font-size: 14px; }
 
     .admin-tabs-container {
         background: #fff;
@@ -427,6 +474,20 @@
 
     function closeModal() {
         document.getElementById('userModal').style.display = 'none';
+        document.getElementById('modalUserId').value = '';
+        document.getElementById('modalUsername').value = '';
+        document.getElementById('modalFullName').value = '';
+        document.getElementById('modalEmail').value = '';
+        document.getElementById('modalDept').value = '';
+        document.getElementById('modalRole').value = '';
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('userModal');
+        if (event.target == modal) {
+            closeModal();
+        }
     }
 
     function saveUser() {
@@ -499,4 +560,29 @@
         fetch('/Admin/ChangeRole', { method: 'POST', body: formData })
         .then(res => res.json()).then(data => { if(data.success) location.reload(); });
     }
+
+    // Animate donut chart on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const circle = document.getElementById('donutProgress');
+        const pctLabel = document.getElementById('donutPct');
+        if (!circle) return;
+
+        const value = parseFloat(circle.dataset.value) || 0;
+        const circumference = 2 * Math.PI * 48; // r=48 → ~301.59
+        const filled = (value / 100) * circumference;
+
+        // Animate count-up
+        let current = 0;
+        const duration = 1200;
+        const step = 16;
+        const increment = value / (duration / step);
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= value) { current = value; clearInterval(timer); }
+            const f = (current / 100) * circumference;
+            circle.setAttribute('stroke-dasharray', `${f.toFixed(2)} ${(circumference - f).toFixed(2)}`);
+            pctLabel.textContent = Math.round(current) + '%';
+        }, step);
+    });
 </script>
