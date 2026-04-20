@@ -1,127 +1,204 @@
+@model KhoaHoc.Models.ViewModels.AdminDashboardViewModel
 @{
-    ViewData["Title"] = "Super Admin Dashboard";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
 <div class="dashboard-container">
     <div class="header-section">
-        <h1>Super Admin Dashboard</h1>
-        <p>Hệ quản trị tối cao của Corporate LMS Pro</p>
+        <h1>Quản trị Hệ thống (Admin)</h1>
+        <p>Quản lý người dùng, phân quyền và theo dõi hoạt động hệ thống.</p>
     </div>
 
-    <!-- Stats Grid -->
+    <!-- Báo cáo tổng (Stats Grid) -->
     <div class="stats-grid">
         <div class="stat-card admin-theme">
             <div class="stat-info">
-                <h3>Tổng người dùng</h3>
-                <div class="value">1,245</div>
-                <div class="stat-change up"><i class="fas fa-arrow-up"></i> 12% so với tháng trước</div>
+                <h3>Tổng Số Người Học</h3>
+                <div class="value">@Model.TotalLearners</div>
             </div>
             <div class="stat-icon"><i class="fas fa-users"></i></div>
         </div>
         <div class="stat-card admin-theme">
             <div class="stat-info">
-                <h3>Tổng khóa học</h3>
-                <div class="value">48</div>
-                <div class="stat-change up"><i class="fas fa-arrow-up"></i> 3 khóa mới</div>
+                <h3>Tỷ Lệ Hoàn Thành</h3>
+                <div class="value">@Model.CompletionRate%</div>
             </div>
-            <div class="stat-icon"><i class="fas fa-book"></i></div>
+            <div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
         </div>
         <div class="stat-card admin-theme">
             <div class="stat-info">
-                <h3>Chứng chỉ đã cấp</h3>
-                <div class="value">856</div>
-                <div class="stat-change up"><i class="fas fa-arrow-up"></i> 5% so với tháng trước</div>
+                <h3>Điểm Trung Bình</h3>
+                <div class="value">@(Model.AverageScore) / 10</div>
             </div>
-            <div class="stat-icon"><i class="fas fa-award"></i></div>
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
         </div>
     </div>
 
-    <div class="admin-message">
-        <div class="icon"><i class="fas fa-shield-alt"></i></div>
-        <div class="content">
-            <h3>Chào mừng Admin!</h3>
-            <p>Hệ thống đang hoạt động ổn định. Dưới đây là tóm tắt các hoạt động mới nhất.</p>
+    <!-- Tab Control cho các chức năng -->
+    <div class="admin-tabs-container card">
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('users-tab')">
+                <i class="fas fa-users-cog"></i> Quản lý Người dùng & Phân quyền
+            </button>
+            <button class="tab-btn" onclick="switchTab('logs-tab')">
+                <i class="fas fa-clipboard-list"></i> Nhật ký hoạt động
+            </button>
         </div>
-    </div>
 
-    <!-- Additional UI Sections -->
-    <div class="grid-2 mt-4" style="margin-top: 2rem;">
-        <!-- Recent Users -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Người dùng mới đăng ký</h3>
-            </div>
-            <div class="card-body" style="padding: 0;">
-                <div class="table-wrapper" style="border: none;">
-                    <table class="lms-table">
+        <div class="tabs-content">
+            <!-- Tab: Quản lý Người dùng -->
+            <div id="users-tab" class="tab-pane active">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <button class="btn btn-success" onclick="openAddModal()"><i class="fas fa-plus"></i> Thêm mới</button>
+                        <button class="btn btn-primary" onclick="openEditModal()"><i class="fas fa-edit"></i> Sửa</button>
+                        <button class="btn btn-danger" onclick="deleteSelected()"><i class="fas fa-trash-alt"></i> Xóa</button>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-warning" style="color: #fff;" onclick="resetPassword()"><i class="fas fa-key"></i> Reset Mật khẩu</button>
+                        <button class="btn btn-dark" onclick="toggleStatus()"><i class="fas fa-user-lock"></i> Khóa / Mở tài khoản</button>
+                        <div class="role-selector">
+                            <select class="form-select" id="roleSelect">
+                                <option value="">-- Đổi Role --</option>
+                                @foreach(var r in Model.AvailableRoles)
+                                {
+                                    <option value="@r.RoleId">@r.RoleName</option>
+                                }
+                            </select>
+                            <button class="btn btn-info" style="color: #fff;" onclick="changeRole()">Áp dụng Role</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="lms-table" id="usersTable">
                         <thead>
                             <tr>
+                                <th style="width: 40px;"></th>
+                                <th>Username</th>
                                 <th>Họ tên</th>
                                 <th>Email</th>
                                 <th>Phòng ban</th>
+                                <th>Role</th>
                                 <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach(var u in Model.Users)
+                            {
+                                if (u.Status == "Deleted") continue;
+                                var roleNames = u.Roles.Select(r => r.RoleName).ToList();
+                                var roleStr = roleNames.Any() ? string.Join(", ", roleNames) : "Employee";
+                                
+                                <tr>
+                                    <td><input type="radio" name="selectedUser" value="@u.UserId" 
+                                            data-fullname="@u.FullName" 
+                                            data-email="@u.Email" 
+                                            data-dept="@u.DepartmentId" /></td>
+                                    <td><div style="font-weight:600;">@u.Username</div></td>
+                                    <td>@u.FullName</td>
+                                    <td>@u.Email</td>
+                                    <td>@(u.Department?.DepartmentName ?? "N/A")</td>
+                                    <td><span class="badge badge-blue">@roleStr</span></td>
+                                    <td>
+                                        @if(u.Status == "Active") {
+                                            <span class="badge badge-success">Active</span>
+                                        } else {
+                                            <span class="badge badge-danger">Locked</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Nhật ký hoạt động -->
+            <div id="logs-tab" class="tab-pane">
+                <div class="table-wrapper">
+                    <table class="lms-table">
+                        <thead>
                             <tr>
-                                <td><div style="font-weight:600;">Nguyễn Văn A</div></td>
-                                <td>nva@corporate.lms</td>
-                                <td>IT</td>
-                                <td><span class="badge badge-success">Active</span></td>
+                                <th>Thời gian</th>
+                                <th>Người dùng</th>
+                                <th>Hành động</th>
+                                <th>Bảng</th>
+                                <th>Chi tiết</th>
+                                <th>IP</th>
                             </tr>
-                            <tr>
-                                <td><div style="font-weight:600;">Trần Thị B</div></td>
-                                <td>ttb@corporate.lms</td>
-                                <td>HR</td>
-                                <td><span class="badge badge-success">Active</span></td>
-                            </tr>
-                            <tr>
-                                <td><div style="font-weight:600;">Lê Hoàng C</div></td>
-                                <td>lhc@corporate.lms</td>
-                                <td>Marketing</td>
-                                <td><span class="badge badge-warning">Pending</span></td>
-                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var log in Model.RecentLogs)
+                            {
+                                <tr>
+                                    <td style="color:#64748b; font-size:13px;">@log.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td style="font-weight:600;">@(log.User?.Username ?? "System")</td>
+                                    <td><span class="badge badge-warning">@log.ActionType</span></td>
+                                    <td>@log.TableName</td>
+                                    <td>@log.Description</td>
+                                    <td>@log.Ipaddress</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- System Logs -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Nhật ký hoạt động hệ thống</h3>
+<!-- Modal Thêm / Sửa -->
+<div id="userModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h3 id="modalTitle">Thêm mới Người dùng</h3>
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="custom-modal-body">
+            <input type="hidden" id="modalUserId" />
+            
+            <div class="form-group mb-3" id="groupUsername">
+                <label>Username</label>
+                <input type="text" id="modalUsername" class="form-control" />
             </div>
-            <div class="card-body" style="padding: 0;">
-                <div class="table-wrapper" style="border: none;">
-                    <table class="lms-table">
-                        <thead>
-                            <tr>
-                                <th>Thời gian</th>
-                                <th>Hành động</th>
-                                <th>Chi tiết</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="color:#64748b; font-size:12px;">10 phút trước</td>
-                                <td><span class="badge badge-blue">Tạo khóa học</span></td>
-                                <td>Admin đã tạo khóa "Bảo mật thông tin"</td>
-                            </tr>
-                            <tr>
-                                <td style="color:#64748b; font-size:12px;">1 giờ trước</td>
-                                <td><span class="badge badge-purple">Phân quyền</span></td>
-                                <td>Cập nhật quyền cho nhóm HR</td>
-                            </tr>
-                            <tr>
-                                <td style="color:#64748b; font-size:12px;">3 giờ trước</td>
-                                <td><span class="badge badge-success">Đăng nhập</span></td>
-                                <td>Có 45 lượt đăng nhập mới</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            
+            <div class="form-group mb-3">
+                <label>Họ tên</label>
+                <input type="text" id="modalFullName" class="form-control" />
             </div>
+            
+            <div class="form-group mb-3">
+                <label>Email</label>
+                <input type="email" id="modalEmail" class="form-control" />
+            </div>
+            
+            <div class="form-group mb-3">
+                <label>Phòng ban</label>
+                <select id="modalDept" class="form-select">
+                    <option value="">-- Chọn phòng ban --</option>
+                    @foreach(var d in Model.Departments)
+                    {
+                        <option value="@d.DepartmentId">@d.DepartmentName</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="form-group mb-3" id="groupRole">
+                <label>Role</label>
+                <select id="modalRole" class="form-select">
+                    <option value="">Employee (Mặc định)</option>
+                    @foreach(var r in Model.AvailableRoles)
+                    {
+                        <option value="@r.RoleName">@r.RoleName</option>
+                    }
+                </select>
+            </div>
+            
+        </div>
+        <div class="custom-modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+            <button class="btn btn-primary" onclick="saveUser()">Lưu</button>
         </div>
     </div>
 </div>
@@ -154,8 +231,6 @@
     .stat-card.admin-theme:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(37,99,235,0.1); }
     .stat-info h3 { font-size: 1rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; }
     .stat-info .value { font-size: 2.2rem; font-weight: 800; color: #0f172a; line-height: 1.2; }
-    .stat-info .stat-change { font-size: 12px; margin-top: 8px; font-weight: 500; }
-    .stat-info .stat-change.up { color: #10b981; }
     
     .stat-icon { 
         font-size: 2.5rem; 
@@ -166,21 +241,262 @@
         border-radius: 1rem;
     }
 
-    .admin-message {
+    .admin-tabs-container {
+        background: #fff;
+        border-radius: 1.2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .tabs-header {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .tab-btn {
+        padding: 15px 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover { color: #2563eb; background: #f1f5f9; }
+    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; background: #fff; }
+    .tabs-content { padding: 20px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .toolbar-left, .toolbar-right { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
         display: flex;
         align-items: center;
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        padding: 1.5rem 2rem;
-        border-radius: 1.2rem;
-        border: 1px solid #bfdbfe;
+        gap: 8px;
+        font-size: 14px;
     }
 
-    .admin-message .icon {
-        font-size: 2.5rem;
-        color: var(--primary, #2563eb);
-        margin-right: 1.5rem;
+    .btn-success { background: #10b981; color: white; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-dark { background: #334155; color: white; }
+    .btn-info { background: #06b6d4; color: white; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+
+    .role-selector {
+        display: flex;
+        gap: 5px;
+        border-left: 2px solid #e2e8f0;
+        padding-left: 15px;
+        margin-left: 5px;
     }
 
-    .admin-message h3 { font-size: 1.3rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.2rem; }
-    .admin-message p { color: #1e40af; line-height: 1.5; margin: 0; font-size: 0.95rem; }
+    .form-select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        outline: none;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+    }
+    
+    .mb-3 { margin-bottom: 1rem; }
+
+    .table-wrapper {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .lms-table { width: 100%; border-collapse: collapse; }
+    .lms-table th, .lms-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .lms-table th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; text-transform: uppercase; }
+    .lms-table tbody tr:hover { background: #f1f5f9; }
+
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+
+    /* Custom Modal */
+    .custom-modal {
+        display: none; 
+        position: fixed; z-index: 9999; left: 0; top: 0;
+        width: 100%; height: 100%; overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center; justify-content: center;
+    }
+    .custom-modal-content {
+        background-color: #fff;
+        margin: auto; padding: 0;
+        border-radius: 12px;
+        width: 400px; max-width: 90%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .custom-modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .custom-modal-header h3 { margin: 0; font-size: 1.2rem; }
+    .close-modal { font-size: 1.5rem; font-weight: bold; cursor: pointer; color: #94a3b8; }
+    .close-modal:hover { color: #0f172a; }
+    .custom-modal-body { padding: 20px; }
+    .custom-modal-footer {
+        padding: 15px 20px; border-top: 1px solid #e2e8f0;
+        display: flex; justify-content: flex-end; gap: 10px;
+    }
 </style>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    function getSelectedUserId() {
+        const selected = document.querySelector('input[name="selectedUser"]:checked');
+        return selected ? selected.value : null;
+    }
+
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = "Thêm mới Người dùng";
+        document.getElementById('modalUserId').value = "";
+        document.getElementById('modalUsername').value = "";
+        document.getElementById('modalFullName').value = "";
+        document.getElementById('modalEmail').value = "";
+        document.getElementById('modalDept').value = "";
+        document.getElementById('modalRole').value = "";
+        
+        document.getElementById('groupUsername').style.display = 'block';
+        document.getElementById('groupRole').style.display = 'block';
+        
+        document.getElementById('userModal').style.display = 'flex';
+    }
+
+    function openEditModal() {
+        const selected = document.querySelector('input[name="selectedUser"]:checked');
+        if (!selected) return alert('Vui lòng chọn 1 người dùng để sửa!');
+
+        document.getElementById('modalTitle').innerText = "Cập nhật Người dùng";
+        document.getElementById('modalUserId').value = selected.value;
+        document.getElementById('modalFullName').value = selected.dataset.fullname || "";
+        document.getElementById('modalEmail').value = selected.dataset.email || "";
+        document.getElementById('modalDept').value = selected.dataset.dept || "";
+        
+        document.getElementById('groupUsername').style.display = 'none';
+        document.getElementById('groupRole').style.display = 'none';
+
+        document.getElementById('userModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('userModal').style.display = 'none';
+    }
+
+    function saveUser() {
+        const id = document.getElementById('modalUserId').value;
+        const username = document.getElementById('modalUsername').value;
+        const fullName = document.getElementById('modalFullName').value;
+        const email = document.getElementById('modalEmail').value;
+        const dept = document.getElementById('modalDept').value;
+        const role = document.getElementById('modalRole').value;
+
+        const isAdd = (id === "");
+        const url = isAdd ? '/Admin/AddUser' : '/Admin/EditUser';
+        
+        const formData = new FormData();
+        if(!isAdd) formData.append('userId', id);
+        if(isAdd) formData.append('username', username);
+        if(isAdd) formData.append('roleName', role);
+        formData.append('fullName', fullName);
+        formData.append('email', email);
+        formData.append('departmentId', dept);
+
+        fetch(url, { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        });
+    }
+
+    function deleteSelected() {
+        const id = getSelectedUserId();
+        if(!id) return alert('Vui lòng chọn 1 người dùng!');
+        if(confirm('Bạn có chắc muốn xóa người dùng này?')) {
+            const formData = new FormData(); formData.append('userId', id);
+            fetch('/Admin/DeleteUser', { method: 'POST', body: formData })
+            .then(res => res.json()).then(data => { if(data.success) location.reload(); });
+        }
+    }
+
+    function resetPassword() {
+        const id = getSelectedUserId();
+        if(!id) return alert('Vui lòng chọn 1 người dùng!');
+        if(confirm('Mật khẩu sẽ được reset thành 123456aA@@. Tiếp tục?')) {
+            const formData = new FormData(); formData.append('userId', id);
+            fetch('/Admin/ResetPassword', { method: 'POST', body: formData })
+            .then(res => res.json()).then(data => { if(data.success) { alert('Reset thành công!'); location.reload(); } });
+        }
+    }
+
+    function toggleStatus() {
+        const id = getSelectedUserId();
+        if(!id) return alert('Vui lòng chọn 1 người dùng!');
+        const formData = new FormData(); formData.append('userId', id);
+        fetch('/Admin/ToggleStatus', { method: 'POST', body: formData })
+        .then(res => res.json()).then(data => { if(data.success) location.reload(); });
+    }
+
+    function changeRole() {
+        const id = getSelectedUserId();
+        if(!id) return alert('Vui lòng chọn 1 người dùng!');
+        const roleId = document.getElementById('roleSelect').value;
+        if(!roleId) return alert('Vui lòng chọn role mới!');
+
+        const formData = new FormData(); 
+        formData.append('userId', id);
+        formData.append('roleId', roleId);
+        fetch('/Admin/ChangeRole', { method: 'POST', body: formData })
+        .then(res => res.json()).then(data => { if(data.success) location.reload(); });
+    }
+</script>
