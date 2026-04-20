@@ -8,27 +8,31 @@
         <p>Hệ quản trị tối cao của Corporate LMS Pro</p>
     </div>
 
+    <!-- Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card admin-theme">
             <div class="stat-info">
                 <h3>Tổng người dùng</h3>
-                <div class="value">--</div>
+                <div class="value">1,245</div>
+                <div class="stat-change up"><i class="fas fa-arrow-up"></i> 12% so với tháng trước</div>
             </div>
             <div class="stat-icon"><i class="fas fa-users"></i></div>
         </div>
         <div class="stat-card admin-theme">
             <div class="stat-info">
                 <h3>Tổng khóa học</h3>
-                <div class="value">--</div>
+                <div class="value">48</div>
+                <div class="stat-change up"><i class="fas fa-arrow-up"></i> 3 khóa mới</div>
             </div>
             <div class="stat-icon"><i class="fas fa-book"></i></div>
         </div>
         <div class="stat-card admin-theme">
             <div class="stat-info">
-                <h3>Báo cáo hệ thống</h3>
-                <div class="value">--</div>
+                <h3>Chứng chỉ đã cấp</h3>
+                <div class="value">856</div>
+                <div class="stat-change up"><i class="fas fa-arrow-up"></i> 5% so với tháng trước</div>
             </div>
-            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-icon"><i class="fas fa-award"></i></div>
         </div>
     </div>
 
@@ -36,7 +40,88 @@
         <div class="icon"><i class="fas fa-shield-alt"></i></div>
         <div class="content">
             <h3>Chào mừng Admin!</h3>
-            <p>Đây là giao diện quản trị tổng thể. Vui lòng sử dụng thanh menu bên trái để quản lý toàn bộ hệ thống.</p>
+            <p>Hệ thống đang hoạt động ổn định. Dưới đây là tóm tắt các hoạt động mới nhất.</p>
+        </div>
+    </div>
+
+    <!-- Additional UI Sections -->
+    <div class="grid-2 mt-4" style="margin-top: 2rem;">
+        <!-- Recent Users -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Người dùng mới đăng ký</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-wrapper" style="border: none;">
+                    <table class="lms-table">
+                        <thead>
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Phòng ban</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><div style="font-weight:600;">Nguyễn Văn A</div></td>
+                                <td>nva@corporate.lms</td>
+                                <td>IT</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><div style="font-weight:600;">Trần Thị B</div></td>
+                                <td>ttb@corporate.lms</td>
+                                <td>HR</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td><div style="font-weight:600;">Lê Hoàng C</div></td>
+                                <td>lhc@corporate.lms</td>
+                                <td>Marketing</td>
+                                <td><span class="badge badge-warning">Pending</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Nhật ký hoạt động hệ thống</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-wrapper" style="border: none;">
+                    <table class="lms-table">
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Hành động</th>
+                                <th>Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="color:#64748b; font-size:12px;">10 phút trước</td>
+                                <td><span class="badge badge-blue">Tạo khóa học</span></td>
+                                <td>Admin đã tạo khóa "Bảo mật thông tin"</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#64748b; font-size:12px;">1 giờ trước</td>
+                                <td><span class="badge badge-purple">Phân quyền</span></td>
+                                <td>Cập nhật quyền cho nhóm HR</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#64748b; font-size:12px;">3 giờ trước</td>
+                                <td><span class="badge badge-success">Đăng nhập</span></td>
+                                <td>Có 45 lượt đăng nhập mới</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -51,10 +136,10 @@
         display: grid; 
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
         gap: 1.5rem; 
-        margin-bottom: 3rem; 
+        margin-bottom: 2rem; 
     }
 
-    .stat-card {
+    .stat-card.admin-theme {
         background: #fff;
         padding: 1.5rem 2rem;
         border-radius: 1.2rem;
@@ -63,29 +148,39 @@
         justify-content: space-between;
         align-items: center;
         transition: transform 0.3s ease;
-        border-bottom: 4px solid #dc3545;
+        border-bottom: 4px solid var(--primary, #2563eb);
     }
 
-    .stat-card:hover { transform: translateY(-5px); }
-    .stat-info h3 { font-size: 1rem; color: #888; font-weight: 500; margin-bottom: 0.5rem; }
-    .stat-info .value { font-size: 2.2rem; font-weight: 800; color: #333; }
-    .stat-icon { font-size: 2.5rem; opacity: 0.2; color: #dc3545; }
+    .stat-card.admin-theme:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(37,99,235,0.1); }
+    .stat-info h3 { font-size: 1rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; }
+    .stat-info .value { font-size: 2.2rem; font-weight: 800; color: #0f172a; line-height: 1.2; }
+    .stat-info .stat-change { font-size: 12px; margin-top: 8px; font-weight: 500; }
+    .stat-info .stat-change.up { color: #10b981; }
+    
+    .stat-icon { 
+        font-size: 2.5rem; 
+        color: var(--primary, #2563eb); 
+        background: rgba(37,99,235,0.1);
+        width: 64px; height: 64px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 1rem;
+    }
 
     .admin-message {
         display: flex;
         align-items: center;
-        background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
-        padding: 2rem;
-        border-radius: 1.5rem;
-        border: 1px solid #ffcccc;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 1.2rem;
+        border: 1px solid #bfdbfe;
     }
 
     .admin-message .icon {
-        font-size: 3rem;
-        color: #dc3545;
-        margin-right: 2rem;
+        font-size: 2.5rem;
+        color: var(--primary, #2563eb);
+        margin-right: 1.5rem;
     }
 
-    .admin-message h3 { font-size: 1.5rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.5rem; }
-    .admin-message p { color: #555; line-height: 1.6; }
+    .admin-message h3 { font-size: 1.3rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.2rem; }
+    .admin-message p { color: #1e40af; line-height: 1.5; margin: 0; font-size: 0.95rem; }
 </style>

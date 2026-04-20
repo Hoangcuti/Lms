@@ -46,7 +46,13 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-primary); transition: background-color 0.4s, color 0.4s; }
+html, body { 
+  height: 100%; 
+  font-family: 'Inter', sans-serif; 
+  background: var(--bg-main); 
+  color: var(--text-primary); 
+  transition: background-color 0.5s ease, color 0.5s ease; 
+}
 h1, h2, h3, h4, h5, h6, .page-title, .card-title, .stat-value, .brand-name, .modal-title { font-family: 'Outfit', sans-serif; letter-spacing: -0.01em; }
 
 /* ===================== DASHBOARD SHELL ===================== */
@@ -1120,4 +1126,107 @@ body::before {
     min-width: unset;
     width: calc(100vw - 32px);
   }
+}
+
+/* ===================== MOBILE HEADER & SIDEBAR ===================== */
+.mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  box-shadow: var(--shadow-sm);
+}
+
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 95;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .mobile-header { display: flex; }
+  .dashboard-shell { flex-direction: column; }
+  
+  .sidebar {
+    position: fixed;
+    top: 0; bottom: 0; left: -260px;
+    width: 260px !important;
+    z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .sidebar.active {
+    left: 0;
+  }
+}
+
+/* ===================== DARK MODE ===================== */
+[data-theme='dark'] {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --bg-glass: rgba(30, 41, 59, 0.76);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --sidebar-bg: #0b1120;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .card,
+[data-theme='dark'] .stat-card,
+[data-theme='dark'] .stat-card.admin-theme,
+[data-theme='dark'] .modal-box,
+[data-theme='dark'] .mobile-header {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+[data-theme='dark'] .stat-info .value,
+[data-theme='dark'] .header-section h1 {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .admin-message {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
+}
+
+[data-theme='dark'] .admin-message h3 {
+  color: #38bdf8;
+}
+
+[data-theme='dark'] .admin-message p {
+  color: #cbd5e1;
+}
+
+/* Thêm transition cho tất cả các element đổi màu nền để hiệu ứng được mượt mà */
+.card, .stat-card, .mobile-header, .admin-message, .sidebar, .page-header {
+  transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease, transform 0.3s ease;
 }

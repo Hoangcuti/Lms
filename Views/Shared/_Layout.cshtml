@@ -38,6 +38,19 @@
         };
     }
     <div class="dashboard-shell">
+        <!-- Mobile Header (Visible only on mobile) -->
+        <div class="mobile-header d-md-none">
+            <div class="mobile-logo">
+                <span class="brand-name" style="color:var(--primary); font-weight:700;">Corporate LMS</span>
+            </div>
+            <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Overlay for mobile -->
+        <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
+
         <!-- ============ SIDEBAR ============ -->
         <aside class="sidebar">
             <div class="sidebar-brand">
@@ -238,6 +251,11 @@
             // Placeholder for navigation logic
             // In a real app, this might change the view or update content via AJAX
             console.log("Navigating to: " + page);
+        }
+
+        function toggleMobileMenu() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.sidebar-overlay').classList.toggle('active');
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
