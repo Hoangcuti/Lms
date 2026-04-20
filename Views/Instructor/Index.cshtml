@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Instructor Dashboard";
+}
+
+<div class="dashboard-container">
+    <div class="header-section">
+        <h1>Instructor Dashboard</h1>
+        <p>Quản lý nội dung giảng dạy và tương tác với học viên</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card instructor-theme">
+            <div class="stat-info">
+                <h3>Khóa học phụ trách</h3>
+                <div class="value">--</div>
+            </div>
+            <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+        </div>
+        <div class="stat-card instructor-theme">
+            <div class="stat-info">
+                <h3>Số lượng học viên</h3>
+                <div class="value">--</div>
+            </div>
+            <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+        </div>
+        <div class="stat-card instructor-theme">
+            <div class="stat-info">
+                <h3>Đánh giá trung bình</h3>
+                <div class="value">--/5.0</div>
+            </div>
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+        </div>
+    </div>
+
+    <div class="instructor-actions">
+        <div class="action-card">
+            <div class="card-text">
+                <h3>Sẵn sàng giảng dạy?</h3>
+                <p>Tạo khóa học mới, cập nhật bài giảng hoặc xem kết quả thi của học viên ngay tại đây.</p>
+            </div>
+            <div class="card-btn">
+                <button class="btn-instructor">Tạo bài học mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container { padding: 2rem; }
+    .header-section { margin-bottom: 2.5rem; }
+    .header-section h1 { font-size: 2.4rem; font-weight: 800; color: #1a1a1a; margin-bottom: 0.5rem; }
+    .header-section p { color: #666; font-size: 1.1rem; }
+
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 1.5rem; 
+        margin-bottom: 3rem; 
+    }
+
+    .stat-card {
+        background: #fff;
+        padding: 1.5rem 2rem;
+        border-radius: 1.2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+        border-bottom: 4px solid #6f42c1;
+    }
+
+    .stat-card:hover { transform: translateY(-5px); }
+    .stat-info h3 { font-size: 1rem; color: #888; font-weight: 500; margin-bottom: 0.5rem; }
+    .stat-info .value { font-size: 2.2rem; font-weight: 800; color: #333; }
+    .stat-icon { font-size: 2.5rem; opacity: 0.2; color: #6f42c1; }
+
+    .instructor-actions {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px dashed #6f42c1;
+    }
+
+    .action-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .card-text h3 { font-size: 1.6rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.8rem; }
+    .card-text p { color: #666; font-size: 1.1rem; }
+
+    .btn-instructor {
+        background: #6f42c1;
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-instructor:hover {
+        background: #5a32a3;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(111, 66, 193, 0.3);
+    }
+</style>

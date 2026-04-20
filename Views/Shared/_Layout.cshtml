@@ -1,0 +1,245 @@
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LMS Corporate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @RenderSection("Header", required: false)
+</head>
+<body>
+    @{
+        var role = User.FindFirst(ClaimTypes.Role)?.Value ?? Context.Session.GetString("Role");
+        var fullName = User.FindFirst("FullName")?.Value ?? Context.Session.GetString("FullName") ?? "Người dùng";
+        var deptName = User.FindFirst("DepartmentName")?.Value ?? "Chưa xác định";
+        var controllerName = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        
+        string roleLabel = role switch {
+            "ADMIN" => "🛡️ Super Admin",
+            "IT" => "⚡ IT Administrator",
+            "HR" => "💚 HR Manager",
+            "Department Manager" => "🏢 Dept Manager",
+            "Instructor" => "👨‍🏫 Instructor",
+            _ => "🎓 Employee"
+        };
+        
+        string dashboardAction = role switch {
+            "ADMIN" => Url.Action("Index", "Admin"),
+            "IT" => Url.Action("Index", "IT"),
+            "HR" => Url.Action("Index", "HR"),
+            "Department Manager" => Url.Action("Index", "DeptManager"),
+            "Instructor" => Url.Action("Index", "Instructor"),
+            _ => Url.Action("Index", "Student")
+        };
+    }
+    <div class="dashboard-shell">
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <a href="/" class="sidebar-logo">
+                    <div class="sidebar-logo-icon">🏢</div>
+                    <div class="sidebar-logo-text">
+                        <span class="brand-name">Corporate LMS</span>
+                        <span class="brand-sub">@role Panel</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="sidebar-avatar">@fullName.Substring(0, Math.Min(2, fullName.Length)).ToUpper()</div>
+                <div class="sidebar-user-info">
+                    <div class="user-name">@fullName</div>
+                    <div class="user-role" style="color:#10b981; font-size: 11px; margin-bottom: 2px;">
+                        @roleLabel
+                    </div>
+                    <div class="user-dept" style="font-size: 10px; color: #94a3b8;">
+                        🏢 @deptName
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Tổng quan</div>
+                <ul style="list-style:none">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="@dashboardAction">
+                            <span class="nav-icon">🏠</span> Dashboard
+                        </a>
+                    </li>
+                </ul>
+
+                @if (role == "ADMIN" || role == "IT")
+                {
+                    <div class="nav-section-label">Quản trị hệ thống</div>
+                    <ul style="list-style:none">
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('users')">
+                                <span class="nav-icon">👤</span> Người dùng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('departments')">
+                                <span class="nav-icon">🏦</span> Phòng ban
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('courses')">
+                                <span class="nav-icon">📚</span> Khóa học
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('permissions')">
+                                <span class="nav-icon">🔐</span> Phân quyền
+                            </a>
+                        </li>
+                        @if (role == "ADMIN") {
+                            <li class="nav-item">
+                                <a class="nav-link" onclick="navigate('auditlogs')">
+                                    <span class="nav-icon">📋</span> Nhật ký hoạt động
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                @if (role == "ADMIN" || role == "HR")
+                {
+                    <div class="nav-section-label">Nhân sự & Đào tạo</div>
+                    <ul style="list-style:none">
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('employees')">
+                                <span class="nav-icon">👥</span> Quản lý nhân sự
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('assignments')">
+                                <span class="nav-icon">🎯</span> Phân công đào tạo
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('budget')">
+                                <span class="nav-icon">💰</span> Ngân sách đào tạo
+                            </a>
+                        </li>
+                    </ul>
+                }
+
+                @if (role == "Department Manager")
+                {
+                    <div class="nav-section-label">Quản lý phòng ban</div>
+                    <ul style="list-style:none">
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('members')">
+                                <span class="nav-icon">👥</span> Nhân viên của tôi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('dept-courses')">
+                                <span class="nav-icon">📚</span> Khóa học bộ phận
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('dept-progress')">
+                                <span class="nav-icon">📈</span> Tiến độ học tập
+                            </a>
+                        </li>
+                    </ul>
+                }
+
+                @if (role == "Instructor")
+                {
+                    <div class="nav-section-label">Giảng dạy</div>
+                    <ul style="list-style:none">
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('my-courses')">
+                                <span class="nav-icon">👨‍🏫</span> Khóa học giảng dạy
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('student-exam-results')">
+                                <span class="nav-icon">📝</span> Kết quả thi học viên
+                            </a>
+                        </li>
+                    </ul>
+                }
+
+                @if (role == "Employee")
+                {
+                    <div class="nav-section-label">Học tập</div>
+                    <ul style="list-style:none">
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Student")">
+                                <span class="nav-icon">📖</span> Khóa học của tôi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="navigate('my-certs')">
+                                <span class="nav-icon">📜</span> Chứng chỉ của tôi
+                            </a>
+                        </li>
+                    </ul>
+                }
+
+                <div class="nav-section-label">Tài khoản</div>
+                <ul style="list-style:none">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Auth/Logout">
+                            <span class="nav-icon">🚪</span> Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer" style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Giao diện</span>
+                <button id="themeToggleBtn" class="btn btn-secondary btn-sm" style="border-radius: 20px; padding: 4px 10px;" onclick="toggleTheme()">
+                    ☀️ Sáng
+                </button>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN CONTENT ============ -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/js/app.js"></script>
+    <script>
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('lms_theme', newTheme);
+            updateThemeButton(newTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) {
+                btn.innerHTML = theme === 'dark' ? '🌙 Tối' : '☀️ Sáng';
+            }
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('lms_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeButton(savedTheme);
+        });
+        
+        function navigate(page) {
+            // Placeholder for navigation logic
+            // In a real app, this might change the view or update content via AJAX
+            console.log("Navigating to: " + page);
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

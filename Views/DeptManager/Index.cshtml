@@ -1,0 +1,103 @@
+@{
+    ViewData["Title"] = "Department Manager Dashboard";
+}
+
+<div class="dashboard-container">
+    <div class="header-section">
+        <h1>Department Manager Dashboard</h1>
+        <p>Quản lý đào tạo và hiệu suất phòng ban của bạn</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card manager-theme">
+            <div class="stat-info">
+                <h3>Nhân viên trong phòng</h3>
+                <div class="value">--</div>
+            </div>
+            <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+        </div>
+        <div class="stat-card manager-theme">
+            <div class="stat-info">
+                <h3>Tiến độ đào tạo trung bình</h3>
+                <div class="value">--%</div>
+            </div>
+            <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+        </div>
+        <div class="stat-card manager-theme">
+            <div class="stat-info">
+                <h3>Khóa học bắt buộc</h3>
+                <div class="value">--</div>
+            </div>
+            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+        </div>
+    </div>
+
+    <div class="manager-welcome">
+        <div class="welcome-card">
+            <h3>Chào mừng Trưởng phòng!</h3>
+            <p>Sử dụng các công cụ bên trái để theo dõi tiến độ học tập và năng lực của đội ngũ nhân viên phòng ban của bạn.</p>
+            <div class="actions">
+                <button class="btn-primary">Xem báo cáo phòng ban</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container { padding: 2rem; }
+    .header-section { margin-bottom: 2.5rem; }
+    .header-section h1 { font-size: 2.4rem; font-weight: 800; color: #1a1a1a; margin-bottom: 0.5rem; }
+    .header-section p { color: #666; font-size: 1.1rem; }
+
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 1.5rem; 
+        margin-bottom: 3rem; 
+    }
+
+    .stat-card {
+        background: #fff;
+        padding: 1.5rem 2rem;
+        border-radius: 1.2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+        border-bottom: 4px solid #007bff;
+    }
+
+    .stat-card:hover { transform: translateY(-5px); }
+    .stat-info h3 { font-size: 1rem; color: #888; font-weight: 500; margin-bottom: 0.5rem; }
+    .stat-info .value { font-size: 2.2rem; font-weight: 800; color: #333; }
+    .stat-icon { font-size: 2.5rem; opacity: 0.2; color: #007bff; }
+
+    .manager-welcome {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        padding: 3rem;
+        border-radius: 2rem;
+        color: white;
+        box-shadow: 0 15px 40px rgba(0,123,255,0.3);
+    }
+
+    .manager-welcome h3 { font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; }
+    .manager-welcome p { font-size: 1.1rem; opacity: 0.9; line-height: 1.6; margin-bottom: 2rem; max-width: 600px; }
+    
+    .btn-primary {
+        background: white;
+        color: #007bff;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: #f8f9fa;
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+</style>
