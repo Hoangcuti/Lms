@@ -1,0 +1,119 @@
+@model IEnumerable<KhoaHoc.Models.AuditLog>
+@{
+    ViewData["Title"] = "Nhật ký hoạt động";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-title">Nhật ký hoạt động hệ thống</div>
+        <div class="page-subtitle">Theo dõi chi tiết các thao tác của người dùng trên hệ thống LMS</div>
+    </div>
+    <div class="header-actions">
+        <a href="@Url.Action("Index", "IT")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="page-section fade-in">
+        <div class="card" style="margin-bottom:16px">
+            <div class="card-body" style="padding:14px 20px; display:flex; justify-content:space-between; align-items:center">
+                <div class="input-wrap" style="flex:1; max-width:400px">
+                    <span class="input-icon">🔍</span>
+                    <input id="logSearch" type="text" class="form-input with-icon" placeholder="Tìm kiếm bộ lọc nhật ký..." onkeyup="filterLogs()">
+                </div>
+                <div style="font-size: 13px; color: #64748b;">Hiển thị 500 bản ghi gần nhất</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-wrapper">
+                <table class="lms-table" id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Người thực hiện</th>
+                            <th>IP Address</th>
+                            <th>Hành động</th>
+                            <th>Bảng/Đối tượng</th>
+                            <th>Mô tả chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td style="color:#64748b; font-size:12px;">@log.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="width:28px; height:28px; background:#e0e7ff; color:#4f46e5; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">
+                                            @((log.User?.FullName ?? log.User?.Username ?? "S")[0].ToString().ToUpper())
+                                        </div>
+                                        <span style="font-weight:600; color:#1e293b;">@(log.User?.FullName ?? log.User?.Username ?? "System")</span>
+                                    </div>
+                                </td>
+                                <td><span style="background:#f1f5f9; padding:4px 8px; border-radius:4px; font-size:12px; color:#64748b; font-family:monospace;">@log.Ipaddress</span></td>
+                                <td>
+                                    @{
+                                        var badgeBg = log.ActionType switch {
+                                            "CREATE" or "INSERT" => "#dcfce7",
+                                            "UPDATE" => "#fef9c3",
+                                            "DELETE" => "#fee2e2",
+                                            "SYSTEM" => "#e0e7ff",
+                                            "BACKUP" => "#cffafe",
+                                            "RESTORE" => "#ffedd5",
+                                            _ => "#f1f5f9"
+                                        };
+                                        var badgeCo = log.ActionType switch {
+                                            "CREATE" or "INSERT" => "#166534",
+                                            "UPDATE" => "#854d0e",
+                                            "DELETE" => "#991b1b",
+                                            "SYSTEM" => "#3730a3",
+                                            "BACKUP" => "#164e63",
+                                            "RESTORE" => "#9a3412",
+                                            _ => "#475569"
+                                        };
+                                    }
+                                    <span style="background:@badgeBg; color:@badgeCo; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">@log.ActionType</span>
+                                </td>
+                                <td style="font-weight:500; color:#334155;">@log.TableName</td>
+                                <td style="color:#475569; font-size:13px; max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="@log.Description">@log.Description</td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:40px; color:#94a3b8;">Chưa có dữ liệu nhật ký.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterLogs() {
+    var input = document.getElementById("logSearch");
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("logsTable");
+    var tr = table.getElementsByTagName("tr");
+    for (var i = 1; i < tr.length; i++) {
+        var tdName = tr[i].getElementsByTagName("td")[1];
+        var tdAction = tr[i].getElementsByTagName("td")[3];
+        var tdDesc = tr[i].getElementsByTagName("td")[5];
+        if (tdName || tdAction || tdDesc) {
+            var txtValue = (tdName.textContent || tdName.innerText) + " " + 
+                           (tdAction.textContent || tdAction.innerText) + " " + 
+                           (tdDesc.textContent || tdDesc.innerText);
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+</script>

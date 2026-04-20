@@ -1,0 +1,117 @@
+@model IEnumerable<KhoaHoc.Models.ViewModels.CourseReportViewModel>
+@{
+    ViewData["Title"] = "Báo cáo khóa học";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <div>
+        <div class="page-title">Quản lý báo cáo khóa học</div>
+        <div class="page-subtitle">Thống kê chi tiết số lượt tham gia, tỷ lệ hoàn thành và điểm số theo từng khóa học</div>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border:none; box-shadow: 0 4px 6px rgba(59,130,246,0.2);" onclick="alert('Tính năng xuất báo cáo tải xuống Excel đang được thiết lập')">
+            <i class="fas fa-file-excel"></i> 📥 Xuất Báo Cáo
+        </button>
+        <a href="@Url.Action("Index", "IT")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="page-section fade-in">
+        <div class="card" style="margin-bottom:16px">
+            <div class="card-body" style="padding:14px 20px; display:flex; justify-content:space-between; align-items:center">
+                <div class="input-wrap" style="flex:1; max-width:400px">
+                    <span class="input-icon">🔍</span>
+                    <input type="text" class="form-input with-icon" id="searchInput" placeholder="Tìm theo tên khóa học..." onkeyup="filterTable()">
+                </div>
+                <div class="stats-badge" style="font-size:13px; color:#64748b; font-weight:600; padding:6px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px;">
+                    Tổng số: <span style="color:#0f172a">@Model.Count() khóa học</span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-wrapper">
+                <table class="lms-table" id="reportTable">
+                    <thead>
+                        <tr>
+                            <th>Mã KH</th>
+                            <th>Tên khóa học</th>
+                            <th style="text-align:center;">Số học viên</th>
+                            <th style="width:250px;">% Hoàn thành (TB)</th>
+                            <th style="text-align:center;">Điểm thi (TB)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var report in Model)
+                        {
+                            <tr>
+                                <td><span style="font-size:12px; font-weight:800; color:#475569; background:#e2e8f0; padding:4px 8px; border-radius:4px; letter-spacing:0.05em">@report.CourseCode</span></td>
+                                <td>
+                                    <div style="font-weight:600; color:#0f172a; font-size:14px;">@report.Title</div>
+                                    <div style="font-size:12px; color:#64748b;">Mã ID HT: @report.CourseId</div>
+                                </td>
+                                <td style="text-align:center;">
+                                    <div style="display:inline-flex; align-items:center; justify-content:center; background:#eff6ff; color:#2563eb; padding:4px 12px; border-radius:20px; font-weight:700; font-size:13px; border:1px solid #bfdbfe;">
+                                        <i class="fas fa-users" style="margin-right:6px; font-size:11px;"></i> @report.TotalLearners
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:12px;">
+                                        <div style="width:40px; text-align:right; font-weight:700; font-size:13px; color:#334155;">@report.CompletionRate%</div>
+                                        <div style="flex:1; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+                                            @{
+                                                string progColor = report.CompletionRate >= 80 ? "linear-gradient(90deg, #10b981, #14b8a6)" : (report.CompletionRate >= 50 ? "linear-gradient(90deg, #f59e0b, #fbbf24)" : "linear-gradient(90deg, #ef4444, #f87171)");
+                                            }
+                                            <div style="width:@report.CompletionRate%; background:@progColor; height:100%; border-radius:4px; box-shadow:0 1px 2px rgba(0,0,0,0.1)"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="text-align:center;">
+                                    @{
+                                        string scoreColor = report.AverageScore >= 8 ? "#166534" : (report.AverageScore >= 5 ? "#854d0e" : "#991b1b");
+                                        string scoreBg = report.AverageScore >= 8 ? "#dcfce7" : (report.AverageScore >= 5 ? "#fef9c3" : "#fee2e2");
+                                    }
+                                    <span style="background:@scoreBg; color:@scoreColor; padding:4px 12px; border-radius:6px; font-weight:800; font-size:14px; border: 1px solid rgba(0,0,0,0.05);">
+                                        @report.AverageScore
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">
+                                    <div style="font-size:32px; margin-bottom:12px;">📭</div>
+                                    <div style="font-weight:600;">Không có dữ liệu khóa học.</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    var input = document.getElementById("searchInput");
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("reportTable");
+    var tr = table.getElementsByTagName("tr");
+    for (var i = 1; i < tr.length; i++) {
+        var td = tr[i].getElementsByTagName("td")[1];
+        if (td) {
+            var txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+</script>

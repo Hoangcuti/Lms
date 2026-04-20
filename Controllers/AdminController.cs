@@ -26,7 +26,7 @@ public class AdminController : Controller
     private IActionResult? RequireAdmin()
     {
         var role = HttpContext.Session.GetString("Role");
-        if (GetCurrentUserId() == null || role != "ADMIN")
+        if (GetCurrentUserId() == null || (role != "ADMIN" && role != "IT"))
             return RedirectToAction("Login", "Auth");
         return null;
     }

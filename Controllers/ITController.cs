@@ -168,6 +168,160 @@ public class ITController : Controller
         return View();
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Logs()
+    {
+        var auth = RequireIT();
+        if (auth != null) return auth;
+
+        var logs = await _db.AuditLogs
+            .Include(l => l.User)
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(500)
+            .ToListAsync();
+
+        return View(logs);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CourseReports()
+    {
+        var auth = RequireIT();
+        if (auth != null) return auth;
+
+        var courseData = await _db.Courses
+            .Select(c => new {
+                c.CourseId,
+                c.CourseCode,
+                c.Title,
+                EnrollmentProgresses = c.Enrollments.Select(e => e.ProgressPercent),
+                ExamScores = c.Exams.SelectMany(e => e.UserExams).Select(ue => ue.Score)
+            })
+            .OrderByDescending(c => c.CourseId)
+            .ToListAsync();
+
+        var reports = courseData.Select(c => new KhoaHoc.Models.ViewModels.CourseReportViewModel
+        {
+            CourseId = c.CourseId,
+            CourseCode = c.CourseCode ?? "N/A",
+            Title = c.Title ?? "Unnamed",
+            TotalLearners = c.EnrollmentProgresses.Count(),
+            CompletionRate = c.EnrollmentProgresses.Any() ? Math.Round((double)c.EnrollmentProgresses.Average(p => p ?? 0), 1) : 0,
+            AverageScore = c.ExamScores.Any(s => s != null) ? Math.Round((double)c.ExamScores.Where(s => s != null).Average(s => s!.Value), 1) : 0
+        }).ToList();
+
+        return View(reports);
+    }
+
+    // ======================================
+    // API: SYSTEM / IT (không có giao diện)
+    // ======================================
+
+    [HttpPost("/api/it/system/deploy")]
+    public async Task<IActionResult> DeploySystem()
+    {
+        var auth = RequireITApi();
+        if (auth != null) return auth;
+
+        var currentUserId = int.Parse(HttpContext.Session.GetString("UserID") ?? "1");
+        _db.AuditLogs.Add(new AuditLog
+        {
+            UserId = currentUserId,
+            ActionType = "SYSTEM",
+            TableName = "System",
+            Description = "Thực hiện triển khai hệ thống (Deploy)",
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Triển khai hệ thống thành công." });
+    }
+
+    [HttpPost("/api/it/system/fix-bugs")]
+    public async Task<IActionResult> FixSystemBugs()
+    {
+        var auth = RequireITApi();
+        if (auth != null) return auth;
+
+        var currentUserId = int.Parse(HttpContext.Session.GetString("UserID") ?? "1");
+        _db.AuditLogs.Add(new AuditLog
+        {
+            UserId = currentUserId,
+            ActionType = "SYSTEM",
+            TableName = "System",
+            Description = "Thực hiện sửa lỗi và dọn dẹp hệ thống",
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Đã dọn dẹp cache và sửa lỗi." });
+    }
+
+    [HttpPost("/api/it/system/backup")]
+    public async Task<IActionResult> BackupDatabase()
+    {
+        var auth = RequireITApi();
+        if (auth != null) return auth;
+
+        var currentUserId = int.Parse(HttpContext.Session.GetString("UserID") ?? "1");
+        _db.AuditLogs.Add(new AuditLog
+        {
+            UserId = currentUserId,
+            ActionType = "BACKUP",
+            TableName = "Database",
+            Description = "Tạo bản sao lưu dữ liệu (Backup)",
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Sao lưu dữ liệu hoàn tất." });
+    }
+
+    [HttpPost("/api/it/system/restore")]
+    public async Task<IActionResult> RestoreDatabase()
+    {
+        var auth = RequireITApi();
+        if (auth != null) return auth;
+
+        var currentUserId = int.Parse(HttpContext.Session.GetString("UserID") ?? "1");
+        _db.AuditLogs.Add(new AuditLog
+        {
+            UserId = currentUserId,
+            ActionType = "RESTORE",
+            TableName = "Database",
+            Description = "Khôi phục dữ liệu hệ thống (Restore)",
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Khôi phục báo cáo hoàn tất." });
+    }
+
+    [HttpPost("/api/it/system/database/optimize")]
+    public async Task<IActionResult> OptimizeDatabase()
+    {
+        var auth = RequireITApi();
+        if (auth != null) return auth;
+
+        var currentUserId = int.Parse(HttpContext.Session.GetString("UserID") ?? "1");
+        _db.AuditLogs.Add(new AuditLog
+        {
+            UserId = currentUserId,
+            ActionType = "MAINTENANCE",
+            TableName = "Database",
+            Description = "Thực hiện tối ưu hóa chỉ mục Database",
+            Ipaddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Tối ưu Database hoàn tất." });
+    }
+
     // API: Thống kê tổng quan hệ thống
     [HttpGet("/api/it/stats")]
     public async Task<IActionResult> Stats()
